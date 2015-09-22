@@ -144,6 +144,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+//    private void sendImage(Bitmap bm){
+//        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//        bm.compress(Bitmap.CompressFormat.PNG,60,stream);
+//        byte[] bytes = stream.toByteArray();
+//        String img  = new String(Base64.encodeToString(bytes,Base64.DEFAULT));
+//        AsyncHttpClient client = new AsyncHttpClient();
+//        RequestParams params = new RequestParams();
+//        params.add("image",img);
+//        client.post("")
+//    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
