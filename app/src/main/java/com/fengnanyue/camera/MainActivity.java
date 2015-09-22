@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static int CAMERA_REQUEST_COED=1;
     private static int PHOTO_REQUEST_COED=2;
+    private static int CROP_REQUEST_COED=3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +91,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void startImageZoom(Uri uri){
-        
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+        intent.putExtra("crop", "true");
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY",1);
+        intent.putExtra("outputX",150);
+        intent.putExtra("outputY",150);
+        intent.putExtra("return-data",true);
+        startActivityForResult(intent,CROP_REQUEST_COED);
+
+
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -103,8 +114,11 @@ public class MainActivity extends AppCompatActivity {
                 Bundle extras = data.getExtras();
                 if(extras!=null){
                     Bitmap bm =extras.getParcelable("data");
-                    ImageView imageView = (ImageView)findViewById(R.id.imageView);
-                    imageView.setImageBitmap(bm);
+                    Uri uri = saveBitmap(bm);
+
+                    startImageZoom(uri);
+//                    ImageView imageView = (ImageView)findViewById(R.id.imageView);
+//                    imageView.setImageBitmap(bm);
                 }
             }
         }
@@ -115,7 +129,18 @@ public class MainActivity extends AppCompatActivity {
             else{
                 Uri uri;
                 uri = data.getData();
+                Uri fileUri = convertUri(uri);
+                startImageZoom(fileUri);
             }
+        }
+        else if(requestCode==CROP_REQUEST_COED){
+            if(data==null){
+                return;
+            }
+            Bundle extras =data.getExtras();
+            Bitmap bm = extras.getParcelable("data");
+            ImageView imageView = (ImageView)findViewById(R.id.imageView);
+            imageView.setImageBitmap(bm);
         }
     }
 
