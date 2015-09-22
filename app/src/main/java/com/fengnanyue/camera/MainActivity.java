@@ -2,7 +2,10 @@ package com.fengnanyue.camera;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -11,14 +14,31 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 public class MainActivity extends AppCompatActivity {
 
     private static int CAMERA_REQUEST_COED=1;
+    private static int PHOTO_REQUEST_COED=2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button btnPhoto = (Button)findViewById(R.id.btn_photo);
+        btnPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(intent,PHOTO_REQUEST_COED);
+            }
+        });
         Button btnCamera = (Button)findViewById(R.id.btn_camera);
         btnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -29,6 +49,49 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    private Uri saveBitmap(Bitmap bm){
+        File tmpDir = new File(Environment.getExternalStorageDirectory() + "/com.fengnanyue.camera");
+        if(!tmpDir.exists()){
+            tmpDir.mkdir();
+        }
+        File img = new File(tmpDir.getAbsolutePath()+ "front.png");
+        try {
+            FileOutputStream fos = new FileOutputStream(img);
+            bm.compress(Bitmap.CompressFormat.PNG, 85, fos);
+            fos.flush();
+            fos.close();
+            return Uri.fromFile(img);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    private Uri convertUri(Uri uri){
+        InputStream is =null;
+        try {
+            is = getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
+            is.close();
+            return saveBitmap(bitmap);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+
+    private void startImageZoom(Uri uri){
+        
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode==CAMERA_REQUEST_COED)
@@ -43,6 +106,15 @@ public class MainActivity extends AppCompatActivity {
                     ImageView imageView = (ImageView)findViewById(R.id.imageView);
                     imageView.setImageBitmap(bm);
                 }
+            }
+        }
+        else if(requestCode==PHOTO_REQUEST_COED){
+            if(data==null){
+                return;
+            }
+            else{
+                Uri uri;
+                uri = data.getData();
             }
         }
     }
